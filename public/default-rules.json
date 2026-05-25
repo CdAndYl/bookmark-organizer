@@ -1,0 +1,591 @@
+{
+  "$schema": "https://github.com/your-org/bookmark-organizer/schema/rule-pack.v1.json",
+  "version": "1.0.0",
+  "name": "默认规则",
+  "description": "中文环境下编程/AI/工具向用户的默认书签分类规则,可在 UI 中修改或导出。",
+  "archiveCategoryId": "archive",
+  "thresholds": { "minPoints": 4, "highPoints": 8, "minMargin": 2 },
+  "categories": [
+    {
+      "id": "ai",
+      "title": "01 AI与自动化",
+      "order": 1,
+      "subfolders": [
+        { "id": "ai-tools", "title": "AI工具与平台" },
+        { "id": "ai-coding", "title": "AI编码与Agent" },
+        { "id": "ai-models-docs", "title": "模型文档与教程" },
+        { "id": "ai-accounts", "title": "AI账号开卡" },
+        { "id": "ai-tempmail", "title": "临时邮箱与验证" },
+        { "id": "ai-proxy", "title": "代理与网络" },
+        { "id": "ai-other", "title": "其他AI", "isFallback": true }
+      ]
+    },
+    {
+      "id": "dev",
+      "title": "02 编程开发",
+      "order": 2,
+      "subfolders": [
+        { "id": "dev-csharp", "title": "C#与.NET" },
+        { "id": "dev-wpf", "title": "WPF与桌面" },
+        { "id": "dev-delphi", "title": "Delphi" },
+        { "id": "dev-python", "title": "Python" },
+        { "id": "dev-cpp", "title": "C++" },
+        { "id": "dev-db", "title": "数据库与索引" },
+        { "id": "dev-git", "title": "Git与代码托管" },
+        { "id": "dev-halcon", "title": "Halcon视觉" },
+        { "id": "dev-blog", "title": "技术博客与文章" },
+        { "id": "dev-other", "title": "其他开发", "isFallback": true }
+      ]
+    },
+    {
+      "id": "tools",
+      "title": "03 工具软件",
+      "order": 3,
+      "subfolders": [
+        { "id": "tools-iso", "title": "系统镜像与下载" },
+        { "id": "tools-online", "title": "在线实用工具" },
+        { "id": "tools-crack", "title": "软件资源与破解" },
+        { "id": "tools-network", "title": "网络IP与DNS" },
+        { "id": "tools-media", "title": "影视资源" },
+        { "id": "tools-other", "title": "其他工具", "isFallback": true }
+      ]
+    },
+    {
+      "id": "learning",
+      "title": "04 学习资料",
+      "order": 4,
+      "subfolders": [
+        { "id": "learning-cert", "title": "软考与证书" },
+        { "id": "learning-interview", "title": "面试刷题" },
+        { "id": "learning-courses", "title": "课程与知识库" },
+        { "id": "learning-docs", "title": "技术文档" },
+        { "id": "learning-other", "title": "其他学习", "isFallback": true }
+      ]
+    },
+    {
+      "id": "accounts",
+      "title": "05 账号与服务",
+      "order": 5,
+      "subfolders": [
+        { "id": "accounts-cloud", "title": "云服务与控制台" },
+        { "id": "accounts-vps", "title": "服务器VPS" },
+        { "id": "accounts-local", "title": "内网本地系统" },
+        { "id": "accounts-shop", "title": "购物订阅与支付" },
+        { "id": "accounts-mail", "title": "邮箱账号" },
+        { "id": "accounts-other", "title": "其他服务", "isFallback": true }
+      ]
+    },
+    {
+      "id": "community",
+      "title": "06 社区娱乐",
+      "order": 6,
+      "subfolders": [
+        { "id": "community-forum", "title": "论坛社区" },
+        { "id": "community-video", "title": "视频音乐" },
+        { "id": "community-game", "title": "游戏娱乐" },
+        { "id": "community-other", "title": "其他社区", "isFallback": true }
+      ]
+    },
+    {
+      "id": "archive",
+      "title": "99 归档待确认",
+      "order": 99,
+      "subfolders": [
+        { "id": "archive-low", "title": "低置信度", "isFallback": true },
+        { "id": "archive-expired", "title": "疑似过期" },
+        { "id": "archive-untitled", "title": "标题不明" },
+        { "id": "archive-other", "title": "其他归档" }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "ai-path",
+      "categoryId": "ai",
+      "subfolderId": "ai-other",
+      "weight": 6,
+      "matchers": [
+        { "field": "path", "type": "regex", "pattern": "/ai(/|$)|无限ai|开卡|ai编码知识" }
+      ]
+    },
+    {
+      "id": "ai-tools",
+      "categoryId": "ai",
+      "subfolderId": "ai-tools",
+      "weight": 5,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "chatgpt,openai,claude,coze,gemini,gpt,llm,大模型,prompt,midjourney,stable,cherry-ai,anyrouter,agent,mcp"
+        }
+      ]
+    },
+    {
+      "id": "ai-coding",
+      "categoryId": "ai",
+      "subfolderId": "ai-coding",
+      "weight": 6,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "claude code,codex,agent skills,mcp,workflow,开发调优"
+        }
+      ]
+    },
+    {
+      "id": "ai-models-docs",
+      "categoryId": "ai",
+      "subfolderId": "ai-models-docs",
+      "weight": 4,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "pytorch,torchvision,模型文档,llm 文档,大模型 文档,claude docs,openai docs"
+        }
+      ]
+    },
+    {
+      "id": "ai-accounts",
+      "categoryId": "ai",
+      "subfolderId": "ai-accounts",
+      "weight": 4,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "开卡,发卡,订阅,月卡,学生认证,google ai pro,pro 学生,小店,shop,card,接码,验证"
+        }
+      ]
+    },
+    {
+      "id": "ai-tempmail",
+      "categoryId": "ai",
+      "subfolderId": "ai-tempmail",
+      "weight": 6,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "临时邮箱,temp mail,duckmail,gptmail,cloud mail,gmail1888,215.im"
+        }
+      ]
+    },
+    {
+      "id": "ai-tempmail-as-mail-account",
+      "categoryId": "accounts",
+      "subfolderId": "accounts-mail",
+      "weight": 4,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "临时邮箱,temp mail,duckmail,gptmail,cloud mail,gmail1888,215.im"
+        }
+      ]
+    },
+    {
+      "id": "ai-proxy",
+      "categoryId": "ai",
+      "subfolderId": "ai-proxy",
+      "weight": 3,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "proxy,代理,ip地址,dns,browserleaks,whoer,iplark,scamalytics,vps,racknerd,justmysocks,openclaw"
+        }
+      ]
+    },
+    {
+      "id": "dev-path",
+      "categoryId": "dev",
+      "subfolderId": "dev-other",
+      "weight": 6,
+      "matchers": [
+        {
+          "field": "path",
+          "type": "regex",
+          "pattern": "c#|\\.net|wpf|delphi|python|c\\+\\+|数据库|索引|git|halcon|刷题面试"
+        }
+      ]
+    },
+    {
+      "id": "dev-csharp",
+      "categoryId": "dev",
+      "subfolderId": "dev-csharp",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "regex",
+          "pattern": "c#|csharp|\\.net|asp\\.net|winform|ef core|entity framework"
+        }
+      ]
+    },
+    {
+      "id": "dev-wpf",
+      "categoryId": "dev",
+      "subfolderId": "dev-wpf",
+      "weight": 7,
+      "matchers": [
+        { "field": "all", "type": "keyword", "pattern": "wpf,prism,xaml,mvvm" }
+      ]
+    },
+    {
+      "id": "dev-delphi",
+      "categoryId": "dev",
+      "subfolderId": "dev-delphi",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "delphi,deaftercreate,declose"
+        }
+      ]
+    },
+    {
+      "id": "dev-python",
+      "categoryId": "dev",
+      "subfolderId": "dev-python",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "python,pip,pandas,django,flask"
+        }
+      ]
+    },
+    {
+      "id": "dev-cpp",
+      "categoryId": "dev",
+      "subfolderId": "dev-cpp",
+      "weight": 7,
+      "matchers": [
+        { "field": "all", "type": "regex", "pattern": "c\\+\\+|cpp|visual c" }
+      ]
+    },
+    {
+      "id": "dev-db",
+      "categoryId": "dev",
+      "subfolderId": "dev-db",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "数据库,sql,mysql,postgres,redis,索引,oracle"
+        }
+      ]
+    },
+    {
+      "id": "dev-git",
+      "categoryId": "dev",
+      "subfolderId": "dev-git",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "git,github,gitee,gitcode"
+        }
+      ]
+    },
+    {
+      "id": "dev-halcon",
+      "categoryId": "dev",
+      "subfolderId": "dev-halcon",
+      "weight": 7,
+      "matchers": [
+        { "field": "all", "type": "keyword", "pattern": "halcon,视觉,机器视觉" }
+      ]
+    },
+    {
+      "id": "dev-blog",
+      "categoryId": "dev",
+      "subfolderId": "dev-blog",
+      "weight": 3,
+      "matchers": [
+        {
+          "field": "domain",
+          "type": "domain-suffix",
+          "pattern": "blog.csdn.net,cnblogs.com,51cto.com,jianshu.com,zhuanlan.zhihu.com"
+        }
+      ]
+    },
+    {
+      "id": "tools-path",
+      "categoryId": "tools",
+      "subfolderId": "tools-other",
+      "weight": 6,
+      "matchers": [
+        {
+          "field": "path",
+          "type": "keyword",
+          "pattern": "工具相关,电影资源下载"
+        }
+      ]
+    },
+    {
+      "id": "tools-iso",
+      "categoryId": "tools",
+      "subfolderId": "tools-iso",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "msdn,itellyou,download,下载,iso,镜像"
+        }
+      ]
+    },
+    {
+      "id": "tools-online",
+      "categoryId": "tools",
+      "subfolderId": "tools-online",
+      "weight": 5,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "在线,convert,generator,生成器,browserleaks,whoer,ip地址,dns"
+        }
+      ]
+    },
+    {
+      "id": "tools-crack",
+      "categoryId": "tools",
+      "subfolderId": "tools-crack",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "52pojie,吾爱破解,破解,激活,密匙,key,注册码,license"
+        }
+      ]
+    },
+    {
+      "id": "tools-network",
+      "categoryId": "tools",
+      "subfolderId": "tools-network",
+      "weight": 4,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "proxy,代理,ip地址,dns,browserleaks,whoer,iplark,scamalytics"
+        }
+      ]
+    },
+    {
+      "id": "tools-media",
+      "categoryId": "tools",
+      "subfolderId": "tools-media",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "电影,4k,蓝光,yinfans,影视"
+        }
+      ]
+    },
+    {
+      "id": "learning-path-interview",
+      "categoryId": "learning",
+      "subfolderId": "learning-interview",
+      "weight": 8,
+      "matchers": [
+        { "field": "path", "type": "keyword", "pattern": "刷题面试" }
+      ]
+    },
+    {
+      "id": "learning-cert",
+      "categoryId": "learning",
+      "subfolderId": "learning-cert",
+      "weight": 8,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "软考,证书,考试,it证书"
+        }
+      ]
+    },
+    {
+      "id": "learning-interview",
+      "categoryId": "learning",
+      "subfolderId": "learning-interview",
+      "weight": 8,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "leetcode,刷题,面试,算法"
+        }
+      ]
+    },
+    {
+      "id": "learning-courses",
+      "categoryId": "learning",
+      "subfolderId": "learning-courses",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "课程,学习,知识库,yuque,语雀,trello,图灵工控"
+        }
+      ]
+    },
+    {
+      "id": "learning-docs",
+      "categoryId": "learning",
+      "subfolderId": "learning-docs",
+      "weight": 5,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "documentation,docs,文档,教程,manual,pdf"
+        }
+      ]
+    },
+    {
+      "id": "accounts-cloud",
+      "categoryId": "accounts",
+      "subfolderId": "accounts-cloud",
+      "weight": 6,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "腾讯云,华为云,aliyun,cloud,console,dashboard,控制台,登录,login,用户中心,管理系统,后台,welcome"
+        },
+        { "field": "all", "type": "regex", "pattern": "cp\\." }
+      ]
+    },
+    {
+      "id": "accounts-local",
+      "categoryId": "accounts",
+      "subfolderId": "accounts-local",
+      "weight": 8,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "regex",
+          "pattern": "127\\.0\\.0\\.1|localhost|192\\.168\\.|内网|本地"
+        }
+      ]
+    },
+    {
+      "id": "accounts-vps",
+      "categoryId": "accounts",
+      "subfolderId": "accounts-vps",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "vps,racknerd,justmysocks,dmit,netcup,搬瓦工,服务器"
+        }
+      ]
+    },
+    {
+      "id": "accounts-shop",
+      "categoryId": "accounts",
+      "subfolderId": "accounts-shop",
+      "weight": 6,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "购物,cart,shop,store,pay,订单,支付,订阅,礼品卡,seagm,app store price"
+        }
+      ]
+    },
+    {
+      "id": "accounts-mail",
+      "categoryId": "accounts",
+      "subfolderId": "accounts-mail",
+      "weight": 5,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "mail,邮箱,gmail,duckmail,gptmail,cloud mail"
+        }
+      ]
+    },
+    {
+      "id": "community-forum",
+      "categoryId": "community",
+      "subfolderId": "community-forum",
+      "weight": 6,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "linux.do,v2ex,论坛,社区,fishc,鱼香ros"
+        }
+      ]
+    },
+    {
+      "id": "community-video",
+      "categoryId": "community",
+      "subfolderId": "community-video",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "bilibili,youtube,视频,音乐"
+        }
+      ]
+    },
+    {
+      "id": "community-game",
+      "categoryId": "community",
+      "subfolderId": "community-game",
+      "weight": 6,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "游戏,game,手游,点卡,steam"
+        }
+      ]
+    },
+    {
+      "id": "archive-untitled",
+      "categoryId": "archive",
+      "subfolderId": "archive-untitled",
+      "weight": 8,
+      "matchers": [
+        {
+          "field": "title",
+          "type": "regex",
+          "pattern": "請稍候|请稍候|untitled|无标题|^new tab$"
+        }
+      ]
+    },
+    {
+      "id": "archive-expired",
+      "categoryId": "archive",
+      "subfolderId": "archive-expired",
+      "weight": 7,
+      "matchers": [
+        {
+          "field": "all",
+          "type": "keyword",
+          "pattern": "404,过期,deprecated,旧版"
+        }
+      ]
+    }
+  ]
+}
