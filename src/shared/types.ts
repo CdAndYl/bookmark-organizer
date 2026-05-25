@@ -63,13 +63,18 @@ export interface AiUsage {
 
 export type AiMode = "uncertain" | "medium" | "all";
 
+export type AiFormat = "openai" | "anthropic";
+
 export interface AiSettings {
   enabled: boolean;
+  apiFormat: AiFormat;
   apiBaseUrl: string;
   apiKey: string;
   model: string;
   mode: AiMode;
   maxItems: number;
+  /** Anthropic only: enable Claude 1M context beta header. */
+  anthropic1mContext: boolean;
 }
 
 export interface AiSettingsForUi extends AiSettings {

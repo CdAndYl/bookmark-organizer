@@ -11,7 +11,7 @@
 
 - 🗂 **规则驱动的分类** — 内置一套面向编程/AI/工具向用户的中文分类规则,开箱即用
 - 🛠 **可视化规则编辑器** — 在 UI 里增删分类、子分类、关键词、权重,支持 JSON 导入导出
-- 🤖 **可选 AI 增强** — 对规则无法高置信度归类的书签,送给你配置的 OpenAI 兼容接口处理(只发送标题/域名/原路径/去 query 的 URL)
+- 🤖 **可选 AI 增强** — 对规则无法高置信度归类的书签,送给你配置的 AI 接口处理。支持 **OpenAI 兼容**(`/chat/completions`)和 **Anthropic 原生**(`/messages`)两种格式(只发送标题/域名/原路径/去 query 的 URL)
 - 💾 **自动备份与恢复** — 每次整理前自动备份,最多保留 5 份历史,可任意恢复
 - 👁 **二次确认 + 预览树** — 整理前可视化预览整套移动计划,再点确认
 - 🔒 **数据全本地** — 规则、AI Key、备份都只写入 `chrome.storage.local`,不上传任何服务器
@@ -100,6 +100,21 @@ npm run build
 ```
 
 完整 schema 见 `src/core/classifier/ruleSchema.ts`。
+
+## AI 接口配置
+
+「AI」页支持两种主流的接口格式,通过顶部「API 格式」下拉切换:
+
+| 格式 | 端点 | 适用于 |
+|---|---|---|
+| **OpenAI 兼容** | `/v1/chat/completions` | OpenAI 官方、DeepSeek、OpenRouter、OneAPI、Moonshot、智谱 GLM 等 |
+| **Anthropic 原生** | `/v1/messages` | Anthropic 官方、anyrouter.top、claude-code-router 等 Claude 路由代理 |
+
+注意:**判断该用哪种格式不是看模型名,而是看接口端点**。anyrouter.top 列出的"gpt-*"模型不能通过 `/chat/completions` 调用,只能通过 `/messages`。
+
+填好 Base URL + API Key 后,点「获取模型」可自动拉取可用模型列表,从下拉里选一个即可。
+
+**Claude 1M 上下文:** 选 Anthropic 格式时,下方会出现「启用 Claude 1M 上下文」勾选框,用于 `claude-opus-4-x` / `claude-sonnet-4-5` 等需要 `anthropic-beta: context-1m-2025-08-07` 才能调用的模型。书签分类对上下文需求很小,默认关闭即可,只在模型报"请启用 1m 上下文"时再勾。
 
 ## 数据隐私
 

@@ -7,17 +7,25 @@ import {
 } from "./prompt";
 
 const REQUEST_TIMEOUT_MS = 30_000;
+const ANTHROPIC_MAX_TOKENS = 4096;
+const ANTHROPIC_VERSION = "2023-06-01";
+const ANTHROPIC_BETA_1M_CONTEXT = "context-1m-2025-08-07";
 
 function baseRoot(url: string): string {
   return String(url || "")
     .trim()
     .replace(/\/+$/, "")
     .replace(/\/chat\/completions$/i, "")
+    .replace(/\/messages$/i, "")
     .replace(/\/models$/i, "");
 }
 
 function chatCompletionsUrl(url: string): string {
   return `${baseRoot(url)}/chat/completions`;
+}
+
+function messagesUrl(url: string): string {
+  return `${baseRoot(url)}/messages`;
 }
 
 function modelsUrl(url: string): string {
@@ -53,10 +61,7 @@ export async function listModels(settings: AiSettings): Promise<{
   if (!settings.apiKey) throw new Error("请先填写 API Key。");
   const response = await fetchWithTimeout(modelsUrl(settings.apiBaseUrl), {
     method: "GET",
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${settings.apiKey}`,
-    },
+    headers: modelsHeaders(settings),
   });
   const text = await response.text();
   if (!response.ok) {
@@ -85,12 +90,16 @@ export async function listModels(settings: AiSettings): Promise<{
   return { models, count: models.length, fetchedAt: new Date().toISOString() };
 }
 
-interface ChatChoice {
-  message?: { content?: string };
-}
-interface ChatPayload {
-  choices?: ChatChoice[];
-  usage?: AiUsage;
+function modelsHeaders(settings: AiSettings): Record<string, string> {
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    Authorization: `Bearer ${settings.apiKey}`,
+  };
+  if (settings.apiFormat === "anthropic") {
+    headers["x-api-key"] = settings.apiKey;
+    headers["anthropic-version"] = ANTHROPIC_VERSION;
+  }
+  return headers;
 }
 
 function extractJson(text: string): { items: unknown[] } {
@@ -112,13 +121,29 @@ export interface AiClassificationItem {
   confidence: string;
 }
 
-export async function classifyWithAi(
+interface OpenAIChatChoice {
+  message?: { content?: string };
+}
+interface OpenAIChatPayload {
+  choices?: OpenAIChatChoice[];
+  usage?: AiUsage;
+}
+
+interface AnthropicContentBlock {
+  type: string;
+  text?: string;
+}
+interface AnthropicPayload {
+  content?: AnthropicContentBlock[];
+  usage?: { input_tokens?: number; output_tokens?: number };
+}
+
+async function callOpenAI(
   settings: AiSettings,
   pack: RulePack,
   items: AiItem[],
-  systemPrompt: string = DEFAULT_SYSTEM_PROMPT,
+  systemPrompt: string,
 ): Promise<{ items: AiClassificationItem[]; usage: AiUsage | null }> {
-  if (items.length === 0) return { items: [], usage: null };
   const body = {
     model: settings.model,
     temperature: 0,
@@ -142,7 +167,7 @@ export async function classifyWithAi(
   if (!response.ok) {
     throw new Error(`AI API ${response.status}: ${text.slice(0, 300)}`);
   }
-  const payload = JSON.parse(text) as ChatPayload;
+  const payload = JSON.parse(text) as OpenAIChatPayload;
   const content = payload.choices?.[0]?.message?.content || "";
   const parsed = extractJson(content);
   if (!Array.isArray(parsed.items)) {
@@ -152,6 +177,79 @@ export async function classifyWithAi(
     items: parsed.items as AiClassificationItem[],
     usage: payload.usage ?? null,
   };
+}
+
+async function callAnthropic(
+  settings: AiSettings,
+  pack: RulePack,
+  items: AiItem[],
+  systemPrompt: string,
+): Promise<{ items: AiClassificationItem[]; usage: AiUsage | null }> {
+  const body = {
+    model: settings.model,
+    max_tokens: ANTHROPIC_MAX_TOKENS,
+    temperature: 0,
+    system: systemPrompt,
+    messages: [
+      { role: "user", content: buildUserPrompt(pack, items) },
+    ],
+  };
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "anthropic-version": ANTHROPIC_VERSION,
+    "x-api-key": settings.apiKey,
+    Authorization: `Bearer ${settings.apiKey}`,
+  };
+  if (settings.anthropic1mContext) {
+    headers["anthropic-beta"] = ANTHROPIC_BETA_1M_CONTEXT;
+  }
+  const response = await fetchWithTimeout(messagesUrl(settings.apiBaseUrl), {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(`AI API ${response.status}: ${text.slice(0, 300)}`);
+  }
+  const payload = JSON.parse(text) as AnthropicPayload;
+  const content = (payload.content ?? [])
+    .filter((b) => b.type === "text" && typeof b.text === "string")
+    .map((b) => b.text)
+    .join("\n")
+    .trim();
+  if (!content) {
+    throw new Error("AI response had no text content.");
+  }
+  const parsed = extractJson(content);
+  if (!Array.isArray(parsed.items)) {
+    throw new Error("AI response JSON missing items array.");
+  }
+  const usage: AiUsage | null = payload.usage
+    ? {
+        prompt_tokens: payload.usage.input_tokens,
+        completion_tokens: payload.usage.output_tokens,
+        total_tokens:
+          (payload.usage.input_tokens ?? 0) +
+          (payload.usage.output_tokens ?? 0),
+      }
+    : null;
+  return {
+    items: parsed.items as AiClassificationItem[],
+    usage,
+  };
+}
+
+export async function classifyWithAi(
+  settings: AiSettings,
+  pack: RulePack,
+  items: AiItem[],
+  systemPrompt: string = DEFAULT_SYSTEM_PROMPT,
+): Promise<{ items: AiClassificationItem[]; usage: AiUsage | null }> {
+  if (items.length === 0) return { items: [], usage: null };
+  return settings.apiFormat === "anthropic"
+    ? callAnthropic(settings, pack, items, systemPrompt)
+    : callOpenAI(settings, pack, items, systemPrompt);
 }
 
 export async function testAiConnection(
@@ -165,7 +263,9 @@ export async function testAiConnection(
   testedAt: string;
 }> {
   if (!settings.apiKey) throw new Error("请先填写 API Key。");
-  const aiTools = pack.categories.find((c) => c.id === "ai")?.subfolders.find((s) => s.id.includes("docs"));
+  const aiDocs = pack.categories
+    .find((c) => c.id === "ai")
+    ?.subfolders.find((s) => s.id.includes("docs"));
   const sample: AiItem[] = [
     {
       id: "test",
@@ -175,7 +275,7 @@ export async function testAiConnection(
       safeUrl: "https://platform.openai.com/docs",
       rule: {
         categoryId: "ai",
-        subfolderId: aiTools?.id ?? pack.categories[0].subfolders[0].id,
+        subfolderId: aiDocs?.id ?? pack.categories[0].subfolders[0].id,
         confidence: "medium",
       },
     },

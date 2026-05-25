@@ -1,6 +1,6 @@
 {
   "name": "bookmark-organizer",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Rule-configurable Chrome bookmark organizer framework with optional AI classification.",
   "private": true,
   "type": "module",

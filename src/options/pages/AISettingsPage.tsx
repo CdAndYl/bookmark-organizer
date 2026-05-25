@@ -1,17 +1,40 @@
 import { useEffect, useRef, useState } from "react";
 import { useBackground } from "../hooks/useBackground";
 import { StatusBar } from "../components/StatusBar";
-import type { AiMode, AiSettings, AiSettingsForUi } from "@/shared/types";
+import type {
+  AiFormat,
+  AiMode,
+  AiSettings,
+  AiSettingsForUi,
+} from "@/shared/types";
 
 const AI_UI_TIMEOUT_MS = 35_000;
 
 const DEFAULTS: AiSettings = {
   enabled: false,
+  apiFormat: "openai",
   apiBaseUrl: "https://api.openai.com/v1",
   apiKey: "",
   model: "gpt-4.1-mini",
   mode: "uncertain",
   maxItems: 80,
+  anthropic1mContext: false,
+};
+
+const FORMAT_PRESETS: Record<
+  AiFormat,
+  { urlPlaceholder: string; modelPlaceholder: string; hint: string }
+> = {
+  openai: {
+    urlPlaceholder: "https://api.openai.com/v1",
+    modelPlaceholder: "gpt-4.1-mini",
+    hint: "适用于 OpenAI / DeepSeek / OpenRouter / OneAPI / Moonshot 等走 /v1/chat/completions 的接口。",
+  },
+  anthropic: {
+    urlPlaceholder: "https://anyrouter.top/v1",
+    modelPlaceholder: "claude-sonnet-4-5-20250929",
+    hint: "适用于 Anthropic 官方 / anyrouter.top / claude-code-router 等走 /v1/messages 的接口。",
+  },
 };
 
 export function AISettingsPage() {
@@ -140,11 +163,22 @@ export function AISettingsPage() {
       </label>
 
       <div className="form-grid">
+        <Field label="API 格式">
+          <select
+            value={settings.apiFormat}
+            onChange={(e) => patch("apiFormat", e.target.value as AiFormat)}
+          >
+            <option value="openai">OpenAI 兼容 (/chat/completions)</option>
+            <option value="anthropic">Anthropic 原生 (/messages)</option>
+          </select>
+          <p className="field-hint">{FORMAT_PRESETS[settings.apiFormat].hint}</p>
+        </Field>
+
         <Field label="API Base URL">
           <input
             type="text"
             value={settings.apiBaseUrl}
-            placeholder="https://api.openai.com/v1"
+            placeholder={FORMAT_PRESETS[settings.apiFormat].urlPlaceholder}
             onChange={(e) => patch("apiBaseUrl", e.target.value)}
             onBlur={scheduleFetchModels}
           />
@@ -155,7 +189,7 @@ export function AISettingsPage() {
             <input
               type="text"
               value={settings.model}
-              placeholder="gpt-4.1-mini"
+              placeholder={FORMAT_PRESETS[settings.apiFormat].modelPlaceholder}
               onChange={(e) => patch("model", e.target.value)}
             />
             <button
@@ -218,6 +252,20 @@ export function AISettingsPage() {
           />
         </Field>
       </div>
+
+      {settings.apiFormat === "anthropic" && (
+        <label className="checkbox-line" style={{ marginTop: 16 }}>
+          <input
+            type="checkbox"
+            checked={settings.anthropic1mContext}
+            onChange={(e) => patch("anthropic1mContext", e.target.checked)}
+          />
+          启用 Claude 1M 上下文 (anthropic-beta: context-1m-2025-08-07)
+          <span className="field-hint" style={{ marginLeft: 8, marginTop: 0 }}>
+            — 用于 claude-opus-4-x / claude-sonnet-4-5 等要求 1M 上下文的模型
+          </span>
+        </label>
+      )}
 
       <div className="section-actions" style={{ marginTop: 16 }}>
         <button type="button" className="btn btn--primary" disabled={busy} onClick={save}>
