@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "功能贯穿 core(organizeByDomain/domainGroup) → protocol(mode 字段) → handlers(分派) → UI(OrganizePage)，需保证各层数据流一致"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "需复用现有 backup/bookmarkTraversal/platform.bookmarks，且新增 registrableDomain 工具前应先搜索是否已有域名提取逻辑(domainOf)"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "OrganizePage 增加模式切换 UI，遵循项目前端约定入口"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "protocol 是判别联合类型，OrganizeResult/PreviewSnapshot 复用，需遵循类型安全约定"}

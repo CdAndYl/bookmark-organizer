@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "审查代码标准与禁用模式"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "校验 core→protocol→handlers→UI 跨层数据流一致，smart 模式无回归"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "校验是否重复实现了已有的域名提取/备份/移动逻辑"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "校验 protocol 联合类型与 OrganizeResult/PreviewSnapshot 复用的类型安全"}

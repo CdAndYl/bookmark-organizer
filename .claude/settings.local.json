@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo *)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(trellis --version)",
+      "Bash(trellis --help)",
+      "Bash(trellis init *)",
+      "Bash(python3 -c \"import ast,sys; ast.parse\\(open\\('.claude/hooks/session-start.py',encoding='utf-8'\\).read\\(\\)\\); print\\('session-start.py parses OK'\\)\")",
+      "Bash(python -c \"import sys; print\\('python OK', sys.version.split\\(\\)[0]\\)\")",
+      "Bash(python3 -c \"import sys; print\\('python3 OK', sys.version.split\\(\\)[0]\\)\")",
+      "Bash(python .claude/hooks/session-start.py)",
+      "Bash(echo \"=== exit: $? ===\")",
+      "Bash(python ./.trellis/scripts/task.py --help)",
+      "Bash(python ./.trellis/scripts/task.py create \"按域名自动分组书签\" --slug group-by-domain)",
+      "Bash(python ./.trellis/scripts/get_context.py --mode packages)",
+      "Bash(python ./.trellis/scripts/task.py start 05-28-group-by-domain)",
+      "Bash(python ./.trellis/scripts/task.py current --source)",
+      "Bash(npx vitest *)",
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}
