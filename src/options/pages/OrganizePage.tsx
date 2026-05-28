@@ -4,10 +4,17 @@ import { BookmarkPreview } from "../components/BookmarkPreview";
 import { BackupList } from "../components/BackupList";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { StatusBar } from "../components/StatusBar";
+import type { OrganizeMode } from "@/core/messaging/protocol";
 import type { OrganizeResult, PreviewSnapshot, RestoreResult } from "@/shared/types";
+
+const MODE_OPTIONS: { value: OrganizeMode; label: string }[] = [
+  { value: "smart", label: "智能整理" },
+  { value: "domain", label: "按域名分组" },
+];
 
 export function OrganizePage() {
   const send = useBackground();
+  const [mode, setMode] = useState<OrganizeMode>("smart");
   const [snapshot, setSnapshot] = useState<PreviewSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -18,7 +25,7 @@ export function OrganizePage() {
   const refresh = useCallback(async () => {
     setError(null);
     try {
-      const next = await send({ command: "get-preview" });
+      const next = await send({ command: "get-preview", mode });
       setSnapshot(next);
       setLastResult(next.lastResult);
     } catch (err) {
@@ -26,7 +33,7 @@ export function OrganizePage() {
     } finally {
       setLoading(false);
     }
-  }, [send]);
+  }, [send, mode]);
 
   useEffect(() => {
     refresh();
@@ -37,7 +44,7 @@ export function OrganizePage() {
     setBusy(true);
     setError(null);
     try {
-      const result = await send({ command: "organize-now" });
+      const result = await send({ command: "organize-now", mode });
       setLastResult(result);
       await refresh();
     } catch (err) {
@@ -86,6 +93,20 @@ export function OrganizePage() {
         <header className="section-header">
           <h2>整理预览</h2>
           <div className="section-actions">
+            <div className="mode-switch" role="group" aria-label="整理模式">
+              {MODE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={`btn ${mode === opt.value ? "btn--primary" : "btn--ghost"}`}
+                  aria-pressed={mode === opt.value}
+                  disabled={busy}
+                  onClick={() => setMode(opt.value)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
             <button
               type="button"
               className="btn btn--ghost"
@@ -104,11 +125,18 @@ export function OrganizePage() {
             </button>
           </div>
         </header>
-        <p className="muted">
-          共 {snapshot.total} 个书签 · 规则命中 {snapshot.sourceCounts.rule} ·
-          AI 命中 {snapshot.sourceCounts.ai} · AI:
-          {snapshot.ai.enabled ? `${snapshot.ai.mode}/${snapshot.ai.model}` : "关闭"}
-        </p>
+        {mode === "domain" ? (
+          <p className="muted">
+            共 {snapshot.total} 个书签 · 将按域名分到{" "}
+            {Object.keys(snapshot.categoryCounts).length} 个文件夹（零散域名归入「其他」）
+          </p>
+        ) : (
+          <p className="muted">
+            共 {snapshot.total} 个书签 · 规则命中 {snapshot.sourceCounts.rule} ·
+            AI 命中 {snapshot.sourceCounts.ai} · AI:
+            {snapshot.ai.enabled ? `${snapshot.ai.mode}/${snapshot.ai.model}` : "关闭"}
+          </p>
+        )}
         {snapshot.status === "already-organized" && (
           <StatusBar kind="success">书签栏已是整理后的结构。</StatusBar>
         )}
@@ -139,17 +167,27 @@ export function OrganizePage() {
         open={confirmOpen}
         title="确认整理书签"
         message={
-          <>
-            <p>
-              将根据规则把 <b>{snapshot.total}</b> 个书签重新分类到 {Object.keys(snapshot.categoryCounts).length} 个目录。
-            </p>
-            <p>
-              操作前会自动备份,你可以随时从"备份历史"恢复。AI 配置:
-              {snapshot.ai.enabled
-                ? `已开启(${snapshot.ai.mode}, ${snapshot.ai.model})`
-                : "关闭"}。
-            </p>
-          </>
+          mode === "domain" ? (
+            <>
+              <p>
+                将按域名把 <b>{snapshot.total}</b> 个书签分组到{" "}
+                {Object.keys(snapshot.categoryCounts).length} 个域名文件夹，零散域名归入「其他」。
+              </p>
+              <p>操作前会自动备份,你可以随时从"备份历史"恢复。</p>
+            </>
+          ) : (
+            <>
+              <p>
+                将根据规则把 <b>{snapshot.total}</b> 个书签重新分类到 {Object.keys(snapshot.categoryCounts).length} 个目录。
+              </p>
+              <p>
+                操作前会自动备份,你可以随时从"备份历史"恢复。AI 配置:
+                {snapshot.ai.enabled
+                  ? `已开启(${snapshot.ai.mode}, ${snapshot.ai.model})`
+                  : "关闭"}。
+              </p>
+            </>
+          )
         }
         confirmLabel="开始整理"
         onConfirm={runOrganize}

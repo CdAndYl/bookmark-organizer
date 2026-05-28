@@ -86,7 +86,7 @@ export function BookmarkPreview({ snapshot }: Props) {
                           onClick={() => toggleSub(subKey)}
                         >
                           <span className="tree-caret">{subOpen ? "▾" : "▸"}</span>
-                          <span className="tree-title">{subName}</span>
+                          <span className="tree-title">{subName || "全部"}</span>
                           <span className="tree-count">{items.length}</span>
                         </button>
                         {subOpen && (

@@ -8,6 +8,8 @@ import { classifyAll } from "@/core/classifier/ruleEngine";
 import { loadActiveRulePack } from "@/core/classifier/rulesService";
 import { getStoredAiSettings } from "@/core/ai/settings";
 import { listBackups } from "./backup";
+import { groupByDomain } from "./domainGroup";
+import { OTHER_FOLDER_TITLE } from "./organizeByDomain";
 import type {
   BookmarkUrl,
   MovePlanEntry,
@@ -38,6 +40,69 @@ function isOrganized(
   const otherEmpty = (other?.children ?? []).length === 0;
   const mobileEmpty = (mobile?.children ?? []).length === 0;
   return matches && otherEmpty && mobileEmpty;
+}
+
+export async function getDomainPreview(): Promise<PreviewSnapshot> {
+  const [root] = await bookmarks.getTree();
+  const { bookmarkBar, other, mobile } = getRoots(root);
+  if (!bookmarkBar || !other) {
+    throw new Error("Cannot find normal Chrome bookmark roots.");
+  }
+
+  const urls: BookmarkUrl[] = [];
+  collectUrls(bookmarkBar, "bookmark_bar", urls);
+  collectUrls(other, "other", urls);
+  collectUrls(mobile, "mobile", urls);
+
+  const { folders, otherItems } = groupByDomain(urls);
+
+  const categoryCounts: Record<string, number> = {};
+  const movePlan: MovePlanEntry[] = [];
+
+  function pushBucket(title: string, items: BookmarkUrl[]) {
+    if (items.length === 0) return;
+    categoryCounts[title] = items.length;
+    for (const item of items) {
+      movePlan.push({
+        bookmarkId: item.id,
+        title: item.title || "(无标题)",
+        url: item.url,
+        fromPath: item.path,
+        toCategoryTitle: title,
+        toSubfolderTitle: "",
+        source: "rule",
+        confidence: "high",
+      });
+    }
+  }
+
+  for (const folder of folders) pushBucket(folder.domain, folder.items);
+  pushBucket(OTHER_FOLDER_TITLE, otherItems);
+
+  const storage = await storageGet<StorageShape>(["lastResult"]);
+  const aiSettings = await getStoredAiSettings();
+  const backups = await listBackups();
+
+  return {
+    status: "ready",
+    total: urls.length,
+    categoryCounts,
+    sourceCounts: { rule: urls.length, ai: 0 },
+    currentTopNames: (bookmarkBar.children ?? []).slice(0, 12).map((c) => c.title),
+    otherChildren: (other.children ?? []).length,
+    mobileChildren: (mobile?.children ?? []).length,
+    movePlan,
+    backups,
+    lastResult: storage.lastResult ?? null,
+    ai: {
+      enabled: aiSettings.enabled,
+      mode: aiSettings.mode,
+      hasApiKey: Boolean(aiSettings.apiKey),
+      model: aiSettings.model,
+      maxItems: aiSettings.maxItems,
+    },
+    at: new Date().toISOString(),
+  };
 }
 
 export async function getPreview(): Promise<PreviewSnapshot> {

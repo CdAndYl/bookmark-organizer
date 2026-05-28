@@ -7,9 +7,12 @@ import type {
 } from "@/shared/types";
 import type { RulePack } from "@/core/classifier/ruleSchema";
 
+/** Organize strategy. Absent defaults to "smart" for backward compatibility. */
+export type OrganizeMode = "smart" | "domain";
+
 export type Command =
-  | { command: "get-preview" }
-  | { command: "organize-now" }
+  | { command: "get-preview"; mode?: OrganizeMode }
+  | { command: "organize-now"; mode?: OrganizeMode }
   | { command: "restore-backup"; backupId: string }
   | { command: "delete-backup"; backupId: string }
   | { command: "get-ai-settings" }

@@ -1,5 +1,6 @@
-import { getPreview } from "@/core/organizer/preview";
+import { getDomainPreview, getPreview } from "@/core/organizer/preview";
 import { organize } from "@/core/organizer/organize";
+import { organizeByDomain } from "@/core/organizer/organizeByDomain";
 import { restoreBackup } from "@/core/organizer/restore";
 import { deleteBackup } from "@/core/organizer/backup";
 import { withRunLock } from "@/core/organizer/lock";
@@ -21,8 +22,10 @@ type Handler<K extends Command["command"]> = (
 ) => Promise<CommandResultMap[K]>;
 
 const handlers: { [K in Command["command"]]: Handler<K> } = {
-  "get-preview": () => getPreview(),
-  "organize-now": () => withRunLock(organize),
+  "get-preview": (msg) =>
+    msg.mode === "domain" ? getDomainPreview() : getPreview(),
+  "organize-now": (msg) =>
+    withRunLock(msg.mode === "domain" ? organizeByDomain : organize),
   "restore-backup": (msg) => withRunLock(() => restoreBackup(msg.backupId)),
   "delete-backup": async (msg) => {
     await deleteBackup(msg.backupId);
